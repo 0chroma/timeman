@@ -44,7 +44,11 @@ defmodule Timeman.MixProject do
       {:telemetry_poller, "~> 0.4"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:guardian, "~> 2.1"},
+      {:comeonin, "~> 5.3"},
+      {:bcrypt_elixir, "~> 2.3"},
+      {:bodyguard, "~> 2.4"}
     ]
   end
 

@@ -33,6 +33,11 @@ defmodule TimemanWeb.Router do
       live_dashboard "/dashboard", metrics: TimemanWeb.Telemetry
     end
   end
+  
+  scope "/api", TimemanWeb do
+    pipe_through :api
+    resources "/users", UserController, except: [:new, :edit] 
+  end
 
   scope "/", TimemanWeb do
     pipe_through :browser

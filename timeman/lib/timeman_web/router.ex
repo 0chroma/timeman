@@ -12,6 +12,10 @@ defmodule TimemanWeb.Router do
   pipeline :api do
     plug :accepts, ["json"]
   end
+  
+  pipeline :auth do
+    plug TimemanWeb.Auth.Pipeline
+  end
 
   # Other scopes may use custom stacks.
   # scope "/api", TimemanWeb do
@@ -36,7 +40,14 @@ defmodule TimemanWeb.Router do
   
   scope "/api", TimemanWeb do
     pipe_through :api
-    resources "/users", UserController, except: [:new, :edit] 
+    resources "/users", UserController, only: [:create]
+    post "/users/signin", UserController, :signin
+    post "/users/signout", UserController, :signout
+  end
+
+  scope "/api", TimemanWeb do
+    pipe_through [:api, :auth]
+    resources "/users", UserController
   end
 
   scope "/", TimemanWeb do

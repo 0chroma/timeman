@@ -4,9 +4,9 @@ defmodule Timeman.Accounts.User do
 
   schema "users" do
     field :username, :string
-    field :encrypted_password, :string
+    field :encrypted_password, :string, redact: true
     field :password, :string, virtual: true
-    field :role, Ecto.Enum, values: [:user, :manager, :admin]
+    field :role, Ecto.Enum, values: [:user, :manager, :admin], default: :user
     field :preferred_hours, :integer
 
     timestamps()
@@ -16,7 +16,7 @@ defmodule Timeman.Accounts.User do
   def changeset(user, attrs) do
     user
     |> cast(attrs, [:username, :password, :role, :preferred_hours])
-    |> validate_required([:username, :password, :role, :preferred_hours])
+    |> validate_required([:username, :password, :role])
     |> validate_format(:username, ~r/^[A-Za-z0-9._-]+$/)
     |> validate_length(:password, min: 8)
     |> unique_constraint(:username)
@@ -28,9 +28,18 @@ defmodule Timeman.Accounts.User do
     case changeset do
       %Ecto.Changeset{valid?: true, changes: %{password: password}}
         ->
-          put_change(changeset, :encrypted_password, Comeonin.Bcrypt.hashpwsalt(password))
+          put_change(changeset, :encrypted_password, Bcrypt.hash_pwd_salt(password))
       _ ->
           changeset
+    end
+  end
+
+  def get_by_username(username) do
+    case Repo.get_by(User, username: username) do
+      nil ->
+        {:error, :not_found}
+      user ->
+        {:ok, user}
     end
   end
 end

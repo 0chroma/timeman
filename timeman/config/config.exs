@@ -26,6 +26,10 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :timeman, BusiApiWeb.Auth.Guardian,
+  issuer: "timeman",
+  secret_key: "z7cQIaiXllsHXi2UWICOJvBePoPwmDB3ieko09ehtm6BFhCAXuwSNv5J9nJAMPKR"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"

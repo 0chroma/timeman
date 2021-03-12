@@ -12,7 +12,6 @@ defmodule TimemanWeb.UserView do
 
   def render("user.json", %{user: user}) do
     %{id: user.id,
-      username: user.username,
-      encrypted_password: user.encrypted_password}
+      username: user.username}
   end
 end

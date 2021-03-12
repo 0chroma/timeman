@@ -3,6 +3,7 @@ defmodule TimemanWeb.UserController do
 
   alias Timeman.Accounts
   alias Timeman.Accounts.User
+  alias TimemanWeb.Auth.Guardian
 
   action_fallback TimemanWeb.FallbackController
 
@@ -39,5 +40,18 @@ defmodule TimemanWeb.UserController do
     with {:ok, %User{}} <- Accounts.delete_user(user) do
       send_resp(conn, :no_content, "")
     end
+  end
+
+  def signin(conn, %{"username" => username, "password" => password}) do
+    with {:ok, user, token} <- Guardian.authenticate(username, password) do
+      conn
+      |> put_status(:created)
+      |> render("user.json", %{user: user, token: token})
+    end
+  end
+
+  def signout(conn) do
+    token = Guardian.Plug.current_token(conn)
+    {:ok, claims} = TimemanWeb.Auth.Guardian.revoke(token)
   end
 end

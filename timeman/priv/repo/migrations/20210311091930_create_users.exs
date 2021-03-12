@@ -5,6 +5,8 @@ defmodule Timeman.Repo.Migrations.CreateUsers do
     create table(:users) do
       add :username, :string
       add :encrypted_password, :string
+      add :role, :string
+      add :preferred_hours, :integer
 
       timestamps()
     end

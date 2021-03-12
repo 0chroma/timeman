@@ -21,4 +21,10 @@ defmodule TimemanWeb.FallbackController do
     |> put_view(TimemanWeb.ErrorView)
     |> render(:"404")
   end
+
+  def call(conn, {:error, :unauthorized}) do
+    conn
+    |> put_status(:unauthorized)
+    |> render(TimemanWeb.ErrorView, :"401")
+  end
 end

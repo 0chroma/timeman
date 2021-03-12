@@ -14,4 +14,9 @@ defmodule TimemanWeb.UserView do
     %{id: user.id,
       username: user.username}
   end
+
+  def render("user_token.json", %{user: user, token: token}) do
+    data = render "user.json", %{user: user}
+    Map.put data, :token, token
+  end
 end

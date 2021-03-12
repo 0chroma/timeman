@@ -45,13 +45,8 @@ defmodule TimemanWeb.UserController do
   def signin(conn, %{"username" => username, "password" => password}) do
     with {:ok, user, token} <- Guardian.authenticate(username, password) do
       conn
-      |> put_status(:created)
-      |> render("user.json", %{user: user, token: token})
+      |> put_status(:ok)
+      |> render("user_token.json", %{user: user, token: token})
     end
-  end
-
-  def signout(conn) do
-    token = Guardian.Plug.current_token(conn)
-    {:ok, claims} = TimemanWeb.Auth.Guardian.revoke(token)
   end
 end

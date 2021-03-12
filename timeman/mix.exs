@@ -48,7 +48,8 @@ defmodule Timeman.MixProject do
       {:guardian, "~> 2.1"},
       {:comeonin, "~> 5.3"},
       {:bcrypt_elixir, "~> 2.3"},
-      {:bodyguard, "~> 2.4"}
+      {:bodyguard, "~> 2.4"},
+      {:poison, "~> 4.0"}
     ]
   end
 

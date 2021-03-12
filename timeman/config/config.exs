@@ -26,7 +26,7 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-config :timeman, BusiApiWeb.Auth.Guardian,
+config :timeman, TimemanWeb.Auth.Guardian,
   issuer: "timeman",
   secret_key: "z7cQIaiXllsHXi2UWICOJvBePoPwmDB3ieko09ehtm6BFhCAXuwSNv5J9nJAMPKR"
 

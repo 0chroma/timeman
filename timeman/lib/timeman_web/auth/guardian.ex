@@ -15,7 +15,7 @@ defmodule TimemanWeb.Auth.Guardian do
   end
 
   def authenticate(username, password) do
-    with {:ok, user} <- User.get_by_username(username) do
+    with {:ok, user} <- Accounts.user_by_username(username) do
       case validate_password(password, user.encrypted_password) do
         true ->
           create_token(user)
@@ -26,7 +26,7 @@ defmodule TimemanWeb.Auth.Guardian do
   end
 
   defp validate_password(password, encrypted_password) do
-    Comeonin.Bcrypt.checkpw(password, encrypted_password)
+    Bcrypt.verify_pass(password, encrypted_password)
   end
 
   defp create_token(user) do

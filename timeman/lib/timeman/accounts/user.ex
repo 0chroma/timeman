@@ -10,6 +10,8 @@ defmodule Timeman.Accounts.User do
     field :preferred_hours, :integer
 
     timestamps()
+
+    has_many :entries, WorkLog.Entry, foreign_key: :user_id, references: :id
   end
 
   @doc false
@@ -31,15 +33,6 @@ defmodule Timeman.Accounts.User do
           put_change(changeset, :encrypted_password, Bcrypt.hash_pwd_salt(password))
       _ ->
           changeset
-    end
-  end
-
-  def get_by_username(username) do
-    case Repo.get_by(User, username: username) do
-      nil ->
-        {:error, :not_found}
-      user ->
-        {:ok, user}
     end
   end
 end

@@ -1,4 +1,6 @@
 defmodule Timeman.Accounts do
+  @behaviour Bodyguard.Policy
+
   @moduledoc """
   The Accounts context.
   """
@@ -110,4 +112,31 @@ defmodule Timeman.Accounts do
         {:ok, user}
     end
   end
+
+  # Admins/Managers can CRUD anything
+  def authorize(:list_user, %{role: :admin} = _current_user), do: :ok
+  def authorize(:create_user, %{role: :admin} = _current_user, _user), do: :ok
+  def authorize(:read_user, %{role: :admin} = _current_user, _user), do: :ok
+  def authorize(:update_user, %{role: :admin} = _current_user, _user), do: :ok
+  def authorize(:delete_user, %{role: :admin} = _current_user, _user), do: :ok
+
+  def authorize(:list_user, %{role: :manager} = _current_user), do: :ok
+  def authorize(:create_user, %{role: :manager} = _current_user, _user), do: :ok
+  def authorize(:read_user, %{role: :manager} = _current_user, _user), do: :ok
+  def authorize(:update_user, %{role: :manager} = _current_user, _user), do: :ok
+  def authorize(:delete_user, %{role: :manager} = _current_user, _user), do: :ok
+
+  # Users can update/read themselves
+  def authorize(:read_user, %{id: user_id} = _current_user, %{id: user_id} = _user), do: :ok
+  def authorize(:update_user, %{id: user_id} = _current_user, %{id: user_id} = _user), do: :ok
+
+  # Anyone can register a normal user
+  def authorize(:create_user, _current_user, %{role: :user} = _user), do: :ok
+  
+  # Otherwise, denied
+  def authorize(:list_user, _current_user), do: :error
+  def authorize(:create_user, _current_user, _user), do: :error
+  def authorize(:read_user, _current_user, _user), do: :error
+  def authorize(:update_user, _current_user, _user), do: :error
+  def authorize(:delete_user, _current_user, _user), do: :error
 end

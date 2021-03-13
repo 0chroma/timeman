@@ -7,12 +7,18 @@ defmodule TimemanWeb.EntryController do
   action_fallback TimemanWeb.FallbackController
 
   def index(conn, _params) do
-    entries = WorkLog.list_entries()
-    render(conn, "index.json", entries: entries)
+    current_user = Guardian.Plug.current_resource(conn)
+
+    with :ok <- Bodyguard.permit(Timeman.WorkLog, :list_entry, current_user) do
+      entries = WorkLog.list_entries_for_user(current_user)
+      render(conn, "index.json", entries: entries)
+    end
   end
 
   def create(conn, %{"entry" => entry_params}) do
-    with {:ok, %Entry{} = entry} <- WorkLog.create_entry(entry_params) do
+    current_user = Guardian.Plug.current_resource(conn)
+    with :ok <- Bodyguard.permit(Timeman.WorkLog, :create_entry, current_user, entry_params),
+         {:ok, %Entry{} = entry} <- WorkLog.create_entry(entry_params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.entry_path(conn, :show, entry))
@@ -21,22 +27,29 @@ defmodule TimemanWeb.EntryController do
   end
 
   def show(conn, %{"id" => id}) do
+    current_user = Guardian.Plug.current_resource(conn)
     entry = WorkLog.get_entry!(id)
-    render(conn, "show.json", entry: entry)
+    with :ok <- Bodyguard.permit(Timeman.WorkLog, :create_entry, current_user, entry) do
+      render(conn, "show.json", entry: entry)
+    end
   end
 
   def update(conn, %{"id" => id, "entry" => entry_params}) do
+    current_user = Guardian.Plug.current_resource(conn)
     entry = WorkLog.get_entry!(id)
 
-    with {:ok, %Entry{} = entry} <- WorkLog.update_entry(entry, entry_params) do
+    with :ok <- Bodyguard.permit(Timeman.WorkLog, :update_entry, current_user, entry),
+         {:ok, %Entry{} = entry} <- WorkLog.update_entry(entry, entry_params) do
       render(conn, "show.json", entry: entry)
     end
   end
 
   def delete(conn, %{"id" => id}) do
+    current_user = Guardian.Plug.current_resource(conn)
     entry = WorkLog.get_entry!(id)
 
-    with {:ok, %Entry{}} <- WorkLog.delete_entry(entry) do
+    with :ok <- Bodyguard.permit(Timeman.WorkLog, :delete_entry, current_user, entry),
+         {:ok, %Entry{}} <- WorkLog.delete_entry(entry) do
       send_resp(conn, :no_content, "")
     end
   end

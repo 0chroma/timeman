@@ -47,7 +47,7 @@ defmodule TimemanWeb.Router do
   scope "/api", TimemanWeb do
     pipe_through [:api, :auth]
     resources "/users", UserController
-    resources "/entries", EntryController, except: [:edit]
+    resources "/entries", EntryController
   end
 
   scope "/", TimemanWeb do

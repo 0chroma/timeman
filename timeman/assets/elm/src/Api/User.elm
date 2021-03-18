@@ -1,6 +1,6 @@
 module Api.User exposing
-    ( User
-    , decoder, encode
+    ( User, UserWithToken
+    , decoder, encode, userWithTokenDecoder, encodeWithToken
     , authentication, registration, update
     )
 
@@ -24,37 +24,62 @@ import Utils.Json
 
 type alias User =
     { username : String
-    , token : Token 
     , role : String
     , id : Int
     , preferredHours : Maybe Int
     }
 
+type alias UserWithToken =
+    { user : User
+    , token : Api.Req.Token
+    }
+
+
+-- Json
 
 decoder : Json.Decoder User
 decoder =
-    Json.map5 User
+    Json.map4 User
         (Json.field "username" Json.string)
-        (Json.field "token" Api.Req.tokenDecoder)
         (Json.field "role" Json.string)
         (Json.field "id" Json.int)
         (Json.field "preferredHours" (Json.maybe Json.int))
 
+userWithTokenDecoder : Json.Decoder UserWithToken
+userWithTokenDecoder =
+    Json.map2 UserWithToken
+        decoder
+        (Json.field "token" (Api.Req.tokenDecoder))
+
+encodeFields : User -> List ( String, Encode.Value )
+encodeFields user = 
+    [ ( "username", Encode.string user.username )
+    , ( "role", Encode.string user.role )
+    , ( "id", Encode.int user.id )
+    , ( "preferredHours", Utils.Json.maybe Encode.int user.preferredHours )
+    ]
+
 
 encode : User -> Json.Value
 encode user =
-    Encode.object
-        [ ( "username", Encode.string user.username )
-        , ( "token", Api.Req.encodeToken user.token )
-        , ( "role", Encode.string user.role )
-        , ( "id", Encode.int user.id )
-        , ( "preferredHours", Utils.Json.maybe Encode.int user.preferredHours )
-        ]
+    Encode.object (encodeFields user)
 
+encodeWithToken : UserWithToken -> Json.Value
+encodeWithToken userToken =
+    Encode.object (List.concat
+        [ (encodeFields userToken.user)
+        , [ ( "token", Api.Req.encodeToken userToken.token ) ]
+        ]
+    )
+
+
+
+
+-- Requests
 
 authentication :
     { user : { user | username: String, password : String }
-    , onResponse : Data User -> msg
+    , onResponse : Data UserWithToken -> msg
     }
     -> Cmd msg
 authentication options =
@@ -70,7 +95,7 @@ authentication options =
         { url = route Api.Routes.SignIn
         , body = Http.jsonBody body
         , expect =
-            Api.Data.expectJson options.onResponse decoder
+            Api.Data.expectJson options.onResponse userWithTokenDecoder
         }
 
 
@@ -81,7 +106,7 @@ registration :
             , password : String
             , role : Maybe String
         }
-    , onResponse : Data User -> msg
+    , onResponse : Data UserWithToken -> msg
     }
     -> Cmd msg
 registration options =
@@ -102,17 +127,17 @@ registration options =
         { url = route Api.Routes.Users
         , body = Http.jsonBody body
         , expect =
-            Api.Data.expectJson options.onResponse decoder
+            Api.Data.expectJson options.onResponse userWithTokenDecoder
         }
 
 
 update :
-    { token : Token
+    { token : Maybe Token
     , user :
         { user
-            | username : String
+            | username : Maybe String
             , password : Maybe String
-            , role : String
+            , role : Maybe String
             , id : Int
             , preferredHours : Maybe Int
         }
@@ -127,9 +152,18 @@ update options =
                 [ ( "user"
                   , Encode.object
                         (List.concat
-                            [ [ ( "username", Encode.string options.user.username )
-                              , ( "role", Encode.string options.user.role )
-                              ]
+                            [ case options.user.username of
+                                Just username ->
+                                    [ ( "username", Encode.string username ) ]
+
+                                Nothing ->
+                                    []
+                            , case options.user.role of
+                                Just role ->
+                                    [ ( "role", Encode.string role ) ]
+
+                                Nothing ->
+                                    []
                             , case options.user.preferredHours of
                                 Just preferredHours ->
                                     [ ( "preferredHours", Encode.int preferredHours ) ]
@@ -147,10 +181,9 @@ update options =
                   )
                 ]
     in
-    Api.Req.put (Just options.token)
+    Api.Req.patch (options.token)
         { url = route (Api.Routes.User options.user.id)
         , body = Http.jsonBody body
         , expect =
             Api.Data.expectJson options.onResponse decoder
         }
-

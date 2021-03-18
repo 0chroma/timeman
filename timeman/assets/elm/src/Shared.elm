@@ -8,7 +8,8 @@ module Shared exposing
     , view
     )
 
-import Api.User exposing (User)
+import Api.User exposing (User, UserWithToken)
+import Api.Req exposing (Token)
 import Browser.Navigation exposing (Key)
 import Html exposing (..)
 import Html.Attributes exposing (class, href)
@@ -30,18 +31,23 @@ type alias Model =
     { url : Url
     , key : Key
     , user : Maybe User
+    , token : Maybe Token
     }
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url key =
     let
-        user =
+        userWithToken =
             flags
-                |> Json.decodeValue (Json.field "user" Api.User.decoder)
+                |> Json.decodeValue (Json.field "user" Api.User.userWithTokenDecoder)
                 |> Result.toMaybe
     in
-        ( Model url key user
+        ( Model
+            url
+            key
+            ( Maybe.map (\uwt -> uwt.user) userWithToken )
+            ( Maybe.map (\uwt -> uwt.token) userWithToken )
         , Cmd.none
         )
 
@@ -92,7 +98,7 @@ accountDetailsView toMsg maybeUser =
     case maybeUser of
         Just user ->
             span [ class "account"]
-            [ span [ ] [ text user.username ]
+            [ a [ href (Route.toString Route.Settings) ] [ text user.username ]
             , a [ href (Route.toString Route.SignIn), onClick (toMsg SignedOutUser)] [ text "Sign Out" ]
             ]
 

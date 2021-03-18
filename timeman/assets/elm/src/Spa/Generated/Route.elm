@@ -12,6 +12,7 @@ type Route
     = Top
     | NotFound
     | Register
+    | Settings
     | SignIn
 
 
@@ -26,6 +27,7 @@ routes =
         [ Parser.map Top Parser.top
         , Parser.map NotFound (Parser.s "not-found")
         , Parser.map Register (Parser.s "register")
+        , Parser.map Settings (Parser.s "settings")
         , Parser.map SignIn (Parser.s "sign-in")
         ]
 
@@ -44,6 +46,9 @@ toString route =
                 
                 Register ->
                     [ "register" ]
+                
+                Settings ->
+                    [ "settings" ]
                 
                 SignIn ->
                     [ "sign-in" ]

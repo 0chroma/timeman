@@ -1,7 +1,7 @@
 module Pages.Register exposing (Params, Model, Msg, page)
 
 import Api.Data exposing (Data)
-import Api.User exposing (User)
+import Api.User exposing (UserWithToken)
 import Browser.Navigation exposing (Key)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -35,7 +35,7 @@ type alias Params =
 
 
 type alias Model =
-    { user : Data User
+    { userWithToken : Data UserWithToken
     , username : String
     , password : String
     , passwordAgain : String
@@ -47,13 +47,7 @@ type alias Model =
 init : Shared.Model -> Url Params -> ( Model, Cmd Msg )
 init shared { params } =
     ( Model
-        (case shared.user of
-            Just user ->
-                Api.Data.Success user
-
-            Nothing ->
-                Api.Data.NotAsked
-        )
+        Api.Data.NotAsked
         ""
         ""
         ""
@@ -72,7 +66,7 @@ type Msg
     | Password String
     | PasswordAgain String
     | Submit
-    | GotUser (Data User)
+    | GotUser (Data UserWithToken)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -99,18 +93,18 @@ update msg model =
                   }
           )
           
-        GotUser user ->
-            case Api.Data.toMaybe user of
-                Just user_ ->
-                    ( { model | user = user }
+        GotUser userWithToken ->
+            case Api.Data.toMaybe userWithToken of
+                Just userWithToken_ ->
+                    ( { model | userWithToken = userWithToken }
                     , Cmd.batch
-                        [ Ports.saveUser user_ 
+                        [ Ports.saveUser userWithToken_
                         , (Utils.Route.navigate model.key Route.Top)
                         ]
                     )
 
                 Nothing ->
-                    ( { model | user = user, invalid = True }
+                    ( { model | userWithToken = userWithToken, invalid = True }
                     , Cmd.none
                     )
 
@@ -118,12 +112,19 @@ save : Model -> Shared.Model -> Shared.Model
 save model shared =
     { shared
         | user =
-            case Api.Data.toMaybe model.user of
-                Just user ->
-                    Just user
+            case Api.Data.toMaybe model.userWithToken of
+                Just userWithToken ->
+                    Just userWithToken.user
 
                 Nothing ->
                     shared.user
+        , token =
+            case Api.Data.toMaybe model.userWithToken of
+                Just userWithToken ->
+                    Just userWithToken.token
+
+                Nothing ->
+                    shared.token
     }
 
 
@@ -182,7 +183,7 @@ viewValidation model =
             else if not isPasswordMatching then
                 "Passwords don't match"
             else if model.invalid then
-                case model.user of
+                case model.userWithToken of
                   Api.Data.Failure list ->
                       Maybe.withDefault "" (List.head list)
                   _ ->

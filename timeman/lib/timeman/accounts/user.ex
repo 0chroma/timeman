@@ -18,7 +18,7 @@ defmodule Timeman.Accounts.User do
   def changeset(user, attrs) do
     user
     |> cast(attrs, [:username, :password, :role, :preferred_hours])
-    |> validate_required([:username, :password, :role])
+    |> validate_required([:username])
     |> validate_format(:username, ~r/^[A-Za-z0-9._-]+$/)
     |> validate_length(:password, min: 8)
     |> unique_constraint(:username)

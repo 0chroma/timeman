@@ -1,6 +1,6 @@
 port module Ports exposing (clearUser, saveUser)
 
-import Api.User exposing (User)
+import Api.User exposing (UserWithToken)
 import Json.Decode as Json
 import Json.Encode as Encode
 
@@ -12,11 +12,11 @@ port outgoing :
     -> Cmd msg
 
 
-saveUser : User -> Cmd msg
+saveUser : UserWithToken -> Cmd msg
 saveUser user =
     outgoing
         { tag = "saveUser"
-        , data = Api.User.encode user
+        , data = Api.User.encodeWithToken user
         }
 
 

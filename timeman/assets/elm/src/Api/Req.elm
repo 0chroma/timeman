@@ -1,7 +1,7 @@
 module Api.Req exposing
-    ( Token
+    ( Token(..)
     , tokenDecoder, encodeToken
-    , get, put, post, delete
+    , get, put, patch, post, delete
     )
 
 {-|
@@ -79,6 +79,17 @@ put :
     -> Cmd msg
 put token options =
     request "PUT" options.body token options
+
+patch :
+    Maybe Token
+    ->
+        { url : String
+        , body : Http.Body
+        , expect : Http.Expect msg
+        }
+    -> Cmd msg
+patch token options =
+    request "PATCH" options.body token options
 
 
 request :

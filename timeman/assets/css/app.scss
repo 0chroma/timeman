@@ -5,6 +5,24 @@
   float: right;
 }
 
+.navbar a {
+  padding: 1em;
+  display: inline-block;
+}
+
+.centered-form {
+  margin-top: 4em;
+  width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.centered-form .error {
+  margin-bottom: 1em;
+  color: #fff;
+  background-color: red;
+}
+
 /* Alerts and form errors */
 .alert {
   padding: 15px;

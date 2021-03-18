@@ -11,6 +11,7 @@ import Url.Parser as Parser exposing ((</>), Parser)
 type Route
     = Top
     | NotFound
+    | Register
     | SignIn
 
 
@@ -24,6 +25,7 @@ routes =
     Parser.oneOf
         [ Parser.map Top Parser.top
         , Parser.map NotFound (Parser.s "not-found")
+        , Parser.map Register (Parser.s "register")
         , Parser.map SignIn (Parser.s "sign-in")
         ]
 
@@ -39,6 +41,9 @@ toString route =
                 
                 NotFound ->
                     [ "not-found" ]
+                
+                Register ->
+                    [ "register" ]
                 
                 SignIn ->
                     [ "sign-in" ]

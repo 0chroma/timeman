@@ -38,7 +38,7 @@ decoder =
         (Json.field "token" Api.Req.tokenDecoder)
         (Json.field "role" Json.string)
         (Json.field "id" Json.int)
-        (Json.field "preferred_hours" (Json.maybe Json.int))
+        (Json.field "preferredHours" (Json.maybe Json.int))
 
 
 encode : User -> Json.Value
@@ -48,7 +48,7 @@ encode user =
         , ( "token", Api.Req.encodeToken user.token )
         , ( "role", Encode.string user.role )
         , ( "id", Encode.int user.id )
-        , ( "preferred_hours", Utils.Json.maybe Encode.int user.preferredHours )
+        , ( "preferredHours", Utils.Json.maybe Encode.int user.preferredHours )
         ]
 
 
@@ -62,20 +62,15 @@ authentication options =
         body : Json.Value
         body =
             Encode.object
-                [ ( "user"
-                  , Encode.object
-                        [ ( "username", Encode.string options.user.username )
-                        , ( "password", Encode.string options.user.password )
-                        ]
-                  )
+                [ ( "username", Encode.string options.user.username )
+                , ( "password", Encode.string options.user.password )
                 ]
     in
     Http.post
-        { url = "https://conduit.productionready.io/api/users/login"
+        { url = route Api.Routes.SignIn
         , body = Http.jsonBody body
         , expect =
-            Api.Data.expectJson options.onResponse
-                (Json.field "user" decoder)
+            Api.Data.expectJson options.onResponse decoder
         }
 
 
@@ -84,6 +79,7 @@ registration :
         { user
             | username : String
             , password : String
+            , role : Maybe String
         }
     , onResponse : Data User -> msg
     }
@@ -97,16 +93,16 @@ registration options =
                   , Encode.object
                         [ ( "username", Encode.string options.user.username )
                         , ( "password", Encode.string options.user.password )
+                        , ( "role", Encode.string (Maybe.withDefault "user" options.user.role ) )
                         ]
                   )
                 ]
     in
     Http.post
-        { url = "https://conduit.productionready.io/api/users"
+        { url = route Api.Routes.Users
         , body = Http.jsonBody body
         , expect =
-            Api.Data.expectJson options.onResponse
-                (Json.field "user" decoder)
+            Api.Data.expectJson options.onResponse decoder
         }
 
 
@@ -136,7 +132,7 @@ update options =
                               ]
                             , case options.user.preferredHours of
                                 Just preferredHours ->
-                                    [ ( "preferred_hours", Encode.int preferredHours ) ]
+                                    [ ( "preferredHours", Encode.int preferredHours ) ]
 
                                 Nothing ->
                                     []
@@ -155,7 +151,6 @@ update options =
         { url = route (Api.Routes.User options.user.id)
         , body = Http.jsonBody body
         , expect =
-            Api.Data.expectJson options.onResponse
-                (Json.field "user" decoder)
+            Api.Data.expectJson options.onResponse decoder
         }
 

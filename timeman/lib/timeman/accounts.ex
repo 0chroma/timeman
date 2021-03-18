@@ -131,7 +131,7 @@ defmodule Timeman.Accounts do
   def authorize(:update_user, %{id: user_id} = _current_user, %{id: user_id} = _user), do: :ok
 
   # Anyone can register a normal user
-  def authorize(:create_user, _current_user, %{role: :user} = _user), do: :ok
+  def authorize(:create_user, _current_user, %{"role" => "user"} = _user), do: :ok
   
   # Otherwise, denied
   def authorize(:list_user, _current_user), do: :error

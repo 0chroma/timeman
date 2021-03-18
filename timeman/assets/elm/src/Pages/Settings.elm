@@ -1,9 +1,7 @@
-module Pages.Top exposing (Params, Model, Msg, page)
+module Pages.Settings exposing (Params, Model, Msg, page)
 
-import Browser.Navigation as Nav
 import Shared
 import Spa.Document exposing (Document)
-import Spa.Generated.Route as Route
 import Spa.Page as Page exposing (Page)
 import Spa.Url as Url exposing (Url)
 
@@ -34,13 +32,7 @@ type alias Model =
 
 init : Shared.Model -> Url Params -> ( Model, Cmd Msg )
 init shared { params } =
-    case shared.user of
-        Just user ->
-            ( {}, Cmd.none )
-        Nothing ->
-            ( {}
-            , Nav.pushUrl shared.key (Route.toString Route.SignIn)
-            )
+    ( {}, Cmd.none )
 
 
 
@@ -79,6 +71,6 @@ subscriptions model =
 
 view : Model -> Document Msg
 view model =
-    { title = "Entries"
+    { title = "Settings"
     , body = []
     }

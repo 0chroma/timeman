@@ -1,7 +1,7 @@
 module Shared exposing
     ( Flags
     , Model
-    , Msg
+    , Msg(..)
     , init
     , subscriptions
     , update
@@ -12,6 +12,7 @@ import Api.User exposing (User)
 import Browser.Navigation exposing (Key)
 import Html exposing (..)
 import Html.Attributes exposing (class, href)
+import Html.Events exposing (onClick)
 import Json.Decode as Json
 import Ports
 import Spa.Document exposing (Document)
@@ -51,16 +52,10 @@ init flags url key =
 
 type Msg
     = SignedOutUser
-    | SignedInUser User
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SignedInUser user ->
-            ( { model | user = Just user }
-            , Ports.saveUser user
-            )
-
         SignedOutUser ->
             ( { model | user = Nothing }
             , Ports.clearUser
@@ -81,17 +76,29 @@ view :
     -> Model
     -> Document msg
 view { page, toMsg } model =
-    { title = page.title
+    { title = page.title ++ "- Time Management"
     , body =
         [ div [ class "layout" ]
             [ header [ class "navbar" ]
-                [ a [ class "link", href (Route.toString Route.Top) ] [ text "Homepage" ]
-                , a [ class "link", href (Route.toString Route.SignIn) ] [ text "Sign In" ]
-                , span [ class "account"]
-                  [ a [ class "link", href (Route.toString Route.SignIn) ] [ text "Sign In" ]
-                  ]
+                [ a [ href (Route.toString Route.Top) ] [ text "Entries" ]
+                , accountDetailsView toMsg model.user
                 ]
-            , div [ class "page" ] page.body
             ]
+            , div [ class "page" ] page.body
         ]
     }
+
+accountDetailsView toMsg maybeUser =
+    case maybeUser of
+        Just user ->
+            span [ class "account"]
+            [ span [ ] [ text user.username ]
+            , a [ href (Route.toString Route.SignIn), onClick (toMsg SignedOutUser)] [ text "Sign Out" ]
+            ]
+
+        Nothing ->
+            span [ class "account"]
+            [ a [ href (Route.toString Route.SignIn) ] [ text "Sign In" ]
+            , a [ href (Route.toString Route.Register) ] [ text "Register" ]
+            ]
+

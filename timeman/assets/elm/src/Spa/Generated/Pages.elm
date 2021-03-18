@@ -11,6 +11,7 @@ module Spa.Generated.Pages exposing
 
 import Pages.Top
 import Pages.NotFound
+import Pages.Register
 import Pages.SignIn
 import Shared
 import Spa.Document as Document exposing (Document)
@@ -25,12 +26,14 @@ import Spa.Url as Url
 type Model
     = Top__Model Pages.Top.Model
     | NotFound__Model Pages.NotFound.Model
+    | Register__Model Pages.Register.Model
     | SignIn__Model Pages.SignIn.Model
 
 
 type Msg
     = Top__Msg Pages.Top.Msg
     | NotFound__Msg Pages.NotFound.Msg
+    | Register__Msg Pages.Register.Msg
     | SignIn__Msg Pages.SignIn.Msg
 
 
@@ -46,6 +49,9 @@ init route =
         
         Route.NotFound ->
             pages.notFound.init ()
+        
+        Route.Register ->
+            pages.register.init ()
         
         Route.SignIn ->
             pages.signIn.init ()
@@ -63,6 +69,9 @@ update bigMsg bigModel =
         
         ( NotFound__Msg msg, NotFound__Model model ) ->
             pages.notFound.update msg model
+        
+        ( Register__Msg msg, Register__Model model ) ->
+            pages.register.update msg model
         
         ( SignIn__Msg msg, SignIn__Model model ) ->
             pages.signIn.update msg model
@@ -83,6 +92,9 @@ bundle bigModel =
         
         NotFound__Model model ->
             pages.notFound.bundle model
+        
+        Register__Model model ->
+            pages.register.bundle model
         
         SignIn__Model model ->
             pages.signIn.bundle model
@@ -155,10 +167,12 @@ upgrade toModel toMsg page =
 pages :
     { top : Upgraded Pages.Top.Params Pages.Top.Model Pages.Top.Msg
     , notFound : Upgraded Pages.NotFound.Params Pages.NotFound.Model Pages.NotFound.Msg
+    , register : Upgraded Pages.Register.Params Pages.Register.Model Pages.Register.Msg
     , signIn : Upgraded Pages.SignIn.Params Pages.SignIn.Model Pages.SignIn.Msg
     }
 pages =
     { top = Pages.Top.page |> upgrade Top__Model Top__Msg
     , notFound = Pages.NotFound.page |> upgrade NotFound__Model NotFound__Msg
+    , register = Pages.Register.page |> upgrade Register__Model Register__Msg
     , signIn = Pages.SignIn.page |> upgrade SignIn__Model SignIn__Msg
     }

@@ -1,4 +1,4 @@
-module Pages.SignIn exposing (Params, Model, Msg, page)
+module Pages.Register exposing (Params, Model, Msg, page)
 
 import Api.Data exposing (Data)
 import Api.User exposing (User)
@@ -13,7 +13,6 @@ import Spa.Url as Url exposing (Url)
 import Shared
 import Ports
 import Utils.Route
-
 
 page : Page Params Model Msg
 page =
@@ -39,7 +38,9 @@ type alias Model =
     { user : Data User
     , username : String
     , password : String
+    , passwordAgain : String
     , key : Key
+    , invalid : Bool
     }
 
 
@@ -55,7 +56,9 @@ init shared { params } =
         )
         ""
         ""
+        ""
         shared.key
+        False
     , Cmd.none
     )
 
@@ -67,6 +70,7 @@ init shared { params } =
 type Msg
     = Username String
     | Password String
+    | PasswordAgain String
     | Submit
     | GotUser (Data User)
 
@@ -80,12 +84,16 @@ update msg model =
         Password password ->
             ({ model | password = password }, Cmd.none)
 
+        PasswordAgain password ->
+            ({ model | passwordAgain = password }, Cmd.none)
+
         Submit ->
             ( model
-            , Api.User.authentication
+            , Api.User.registration
                   { user =
                       { username = model.username
                       , password = model.password
+                      , role = Nothing
                       }
                   , onResponse = GotUser
                   }
@@ -102,7 +110,7 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | user = user }
+                    ( { model | user = user, invalid = True }
                     , Cmd.none
                     )
 
@@ -135,12 +143,13 @@ subscriptions model =
 
 view : Model -> Document Msg
 view model =
-    { title = "Sign In"
+    { title = "Register"
     , body =
         [ Html.form [ class "centered-form", onSubmit Submit]
-            [ h2 [] [ text "Sign In"]
+            [ h2 [] [ text "Register"]
             , viewInput "text" "Username" model.username Username
             , viewInput "password" "Password" model.password Password
+            , viewInput "password" "Confirm Password" model.passwordAgain PasswordAgain
             , viewValidation model
             ]
         ]
@@ -153,11 +162,36 @@ viewInput t p v toMsg =
 viewValidation : Model -> Html msg
 viewValidation model =
     let 
-        isFilled =
-            (not (model.username == "")) && (not (model.password == ""))
-        isLength =
-          (String.length model.username) >= 5 && (String.length model.password) >= 8
+        isPasswordMatching =
+            model.password == model.passwordAgain
+
+        isUsernameLength =
+            (String.length model.username) >= 5
+
+        isPasswordLength =
+            (String.length model.password) >= 8
+
         isDisabled =
-          not (isFilled && isLength)
+             not (isUsernameLength && isPasswordLength && isPasswordMatching)
+
+        errorText =
+            if not isUsernameLength && not (model.username == "") then
+                "Username too short"
+            else if not isPasswordLength && not (model.password == "") then
+                "Password too short"
+            else if not isPasswordMatching then
+                "Passwords don't match"
+            else if model.invalid then
+                case model.user of
+                  Api.Data.Failure list ->
+                      Maybe.withDefault "" (List.head list)
+                  _ ->
+                      ""
+            else
+                ""
+
     in
-    button [type_ "submit", class "centered", disabled isDisabled ] [ text "Sign In" ]
+    div []
+        [ div [ class "error" ] [ text errorText ]
+        , button [type_ "submit", class "centered", disabled isDisabled ] [ text "Register" ]
+        ]

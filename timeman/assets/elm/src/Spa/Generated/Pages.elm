@@ -14,6 +14,7 @@ import Pages.NotFound
 import Pages.Register
 import Pages.Settings
 import Pages.SignIn
+import Pages.Users
 import Shared
 import Spa.Document as Document exposing (Document)
 import Spa.Generated.Route as Route exposing (Route)
@@ -30,6 +31,7 @@ type Model
     | Register__Model Pages.Register.Model
     | Settings__Model Pages.Settings.Model
     | SignIn__Model Pages.SignIn.Model
+    | Users__Model Pages.Users.Model
 
 
 type Msg
@@ -38,6 +40,7 @@ type Msg
     | Register__Msg Pages.Register.Msg
     | Settings__Msg Pages.Settings.Msg
     | SignIn__Msg Pages.SignIn.Msg
+    | Users__Msg Pages.Users.Msg
 
 
 
@@ -61,6 +64,9 @@ init route =
         
         Route.SignIn ->
             pages.signIn.init ()
+        
+        Route.Users ->
+            pages.users.init ()
 
 
 
@@ -84,6 +90,9 @@ update bigMsg bigModel =
         
         ( SignIn__Msg msg, SignIn__Model model ) ->
             pages.signIn.update msg model
+        
+        ( Users__Msg msg, Users__Model model ) ->
+            pages.users.update msg model
         
         _ ->
             ( bigModel, Cmd.none )
@@ -110,6 +119,9 @@ bundle bigModel =
         
         SignIn__Model model ->
             pages.signIn.bundle model
+        
+        Users__Model model ->
+            pages.users.bundle model
 
 
 view : Model -> Document Msg
@@ -182,6 +194,7 @@ pages :
     , register : Upgraded Pages.Register.Params Pages.Register.Model Pages.Register.Msg
     , settings : Upgraded Pages.Settings.Params Pages.Settings.Model Pages.Settings.Msg
     , signIn : Upgraded Pages.SignIn.Params Pages.SignIn.Model Pages.SignIn.Msg
+    , users : Upgraded Pages.Users.Params Pages.Users.Model Pages.Users.Msg
     }
 pages =
     { top = Pages.Top.page |> upgrade Top__Model Top__Msg
@@ -189,4 +202,5 @@ pages =
     , register = Pages.Register.page |> upgrade Register__Model Register__Msg
     , settings = Pages.Settings.page |> upgrade Settings__Model Settings__Msg
     , signIn = Pages.SignIn.page |> upgrade SignIn__Model SignIn__Msg
+    , users = Pages.Users.page |> upgrade Users__Model Users__Msg
     }

@@ -14,6 +14,7 @@ type Route
     | Register
     | Settings
     | SignIn
+    | Users
 
 
 fromUrl : Url -> Maybe Route
@@ -29,6 +30,7 @@ routes =
         , Parser.map Register (Parser.s "register")
         , Parser.map Settings (Parser.s "settings")
         , Parser.map SignIn (Parser.s "sign-in")
+        , Parser.map Users (Parser.s "users")
         ]
 
 
@@ -52,6 +54,9 @@ toString route =
                 
                 SignIn ->
                     [ "sign-in" ]
+                
+                Users ->
+                    [ "users" ]
     in
     segments
         |> String.join "/"

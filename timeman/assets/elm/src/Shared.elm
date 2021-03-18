@@ -87,12 +87,19 @@ view { page, toMsg } model =
         [ div [ class "layout" ]
             [ header [ class "navbar" ]
                 [ a [ href (Route.toString Route.Top) ] [ text "Entries" ]
+                , adminLink model.user
                 , accountDetailsView toMsg model.user
                 ]
             ]
             , div [ class "page" ] page.body
         ]
     }
+
+adminLink maybeUser =
+    case Maybe.map (\user -> user.role) maybeUser of
+        Just "admin" -> a [ href (Route.toString Route.Users) ] [ text "Users" ]
+        _ -> text ""
+            
 
 accountDetailsView toMsg maybeUser =
     case maybeUser of

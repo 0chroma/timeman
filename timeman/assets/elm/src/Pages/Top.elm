@@ -160,7 +160,7 @@ update msg model =
                             , date = Just model.entryDate
                             , hours = Just model.entryHours
                             , notes = Just model.entryNotes
-                            , user_id = Just model.user.id
+                            , user_id = Just entry.user_id
                             }
                         , onResponse = ModalResponse 
                         }
@@ -252,7 +252,7 @@ entryRow entry =
     tr []
     [ td [] [ text entry.date ]
     , td [] [ text ( String.fromInt entry.hours ) ]
-    , td [] [ text entry.notes ]
+    , td [] ( String.split "\n" entry.notes |> List.map ( \line -> div [] [ text line ] ) )
     , td [] [ text ( String.fromInt entry.user_id ) ]
     , td []
       [ a [ href "#", onClick ( Modal ( EditMode entry ) ) ] [ text "Edit" ]
@@ -287,11 +287,11 @@ entryModal model =
             , onInput UpdateHours
             , Html.Attributes.min "1"
             , Html.Attributes.max "24"] []
-        , textarea [ onInput UpdateNotes ] [ text model.entryNotes ]
+        , textarea [ required True, onInput UpdateNotes ] [ text model.entryNotes ]
         , button [ type_ "submit" ] [ text "Save" ]
         ]
       ]
 
 viewInput : String -> String -> String -> (String -> msg) -> Html msg
 viewInput t p v toMsg =
-  input [ type_ t, placeholder p, value v, onInput toMsg ] []
+  input [ type_ t, required True, placeholder p, value v, onInput toMsg ] []

@@ -119,7 +119,7 @@ defmodule Timeman.WorkLog do
 
   # Users can CRUD their own entries
   def authorize(:list_entry, %{id: user_id} = _current_user, _entry), do: :ok # scoped down by query
-  def authorize(:create_entry, %{id: user_id} = _current_user, %{user_id: user_id} = _entry), do: :ok
+  def authorize(:create_entry, %{id: user_id} = _current_user, %{"user_id" => user_id} = _entry), do: :ok
   def authorize(:read_entry, %{id: user_id} = _current_user, %{user_id: user_id} = _entry), do: :ok
   def authorize(:update_entry, %{id: user_id} = _current_user, %{user_id: user_id} = _entry), do: :ok
   def authorize(:delte_entry, %{id: user_id} = _current_user, %{user_id: user_id} = _entry), do: :ok

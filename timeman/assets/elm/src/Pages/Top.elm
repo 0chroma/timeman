@@ -279,7 +279,7 @@ entryModal model =
       [ button [ class "modal-close", onClick (Modal HideMode) ] [ text "×" ]
       , h2 [] [ text modalHeader ]
       , Html.form [ onSubmit ModalSubmit ]
-        [ viewInput "text" "Date" model.entryDate UpdateDate
+        [ viewInput "date" "Date" model.entryDate UpdateDate
         , input
             [ type_ "number"
             , placeholder "Hours"

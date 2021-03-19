@@ -11,7 +11,7 @@ defmodule Timeman.Accounts.User do
 
     timestamps()
 
-    has_many :entries, Timeman.WorkLog.Entry, foreign_key: :user_id, references: :id
+    has_many :entries, Timeman.WorkLog.Entry
   end
 
   @doc false

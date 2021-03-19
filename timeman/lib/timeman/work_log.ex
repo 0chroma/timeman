@@ -111,20 +111,21 @@ defmodule Timeman.WorkLog do
   end
 
   # Admins can CRUD anything
-  def authorize(:list_entry, %{role: :admin} = _current_user), do: :ok
+  def authorize(:list_entry, %{role: :admin} = _current_user, _entry), do: :ok
   def authorize(:create_entry, %{role: :admin} = _current_user, _entry), do: :ok
   def authorize(:read_entry, %{role: :admin} = _current_user, _entry), do: :ok
   def authorize(:update_entry, %{role: :admin} = _current_user, _entry), do: :ok
   def authorize(:delete_entry, %{role: :admin} = _current_user, _entry), do: :ok
 
   # Users can CRUD their own entries
-  def authorize(:list_entry, _current_user), do: :ok # scoped down by query
+  def authorize(:list_entry, %{id: user_id} = _current_user, _entry), do: :ok # scoped down by query
   def authorize(:create_entry, %{id: user_id} = _current_user, %{user_id: user_id} = _entry), do: :ok
   def authorize(:read_entry, %{id: user_id} = _current_user, %{user_id: user_id} = _entry), do: :ok
   def authorize(:update_entry, %{id: user_id} = _current_user, %{user_id: user_id} = _entry), do: :ok
   def authorize(:delte_entry, %{id: user_id} = _current_user, %{user_id: user_id} = _entry), do: :ok
 
   # Otherwise, denied
+  def authorize(:list_entry, _current_user, _entry), do: :error
   def authorize(:create_entry, _current_user, _user), do: :error
   def authorize(:read_entry, _current_user, _entry), do: :error
   def authorize(:update_entry, _current_user, _entry), do: :error

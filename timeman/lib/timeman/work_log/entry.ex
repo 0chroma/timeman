@@ -5,9 +5,9 @@ defmodule Timeman.WorkLog.Entry do
 
   schema "entries" do
     field :date, :date
-    field :hours, :integer
-    field :notes, :string
-    belongs_to :user, Timeman.Accounts.User, foreign_key: :user_id, references: :id, define_field: false
+    field :hours, :integer, default: 1
+    field :notes, :string, default: ""
+    belongs_to :user, Timeman.Accounts.User
 
     timestamps()
   end
@@ -15,8 +15,7 @@ defmodule Timeman.WorkLog.Entry do
   @doc false
   def changeset(entry, attrs) do
     entry
-    |> cast(attrs, [:date, :hours, :notes])
-    |> validate_required([:date, :hours, :notes])
+    |> cast(attrs, [:date, :hours, :notes, :user_id])
   end
 
   def scope(query, %Timeman.Accounts.User{id: user_id, role: user_role}, _) do

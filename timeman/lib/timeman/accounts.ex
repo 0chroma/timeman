@@ -114,13 +114,13 @@ defmodule Timeman.Accounts do
   end
 
   # Admins/Managers can CRUD anything
-  def authorize(:list_user, %{role: :admin} = _current_user), do: :ok
+  def authorize(:list_user, %{role: :admin} = _current_user, _), do: :ok
   def authorize(:create_user, %{role: :admin} = _current_user, _user), do: :ok
   def authorize(:read_user, %{role: :admin} = _current_user, _user), do: :ok
   def authorize(:update_user, %{role: :admin} = _current_user, _user), do: :ok
   def authorize(:delete_user, %{role: :admin} = _current_user, _user), do: :ok
 
-  def authorize(:list_user, %{role: :manager} = _current_user), do: :ok
+  def authorize(:list_user, %{role: :manager} = _current_user, _), do: :ok
   def authorize(:create_user, %{role: :manager} = _current_user, _user), do: :ok
   def authorize(:read_user, %{role: :manager} = _current_user, _user), do: :ok
   def authorize(:update_user, %{role: :manager} = _current_user, _user), do: :ok
@@ -134,7 +134,7 @@ defmodule Timeman.Accounts do
   def authorize(:create_user, _current_user, %{"role" => "user"} = _user), do: :ok
   
   # Otherwise, denied
-  def authorize(:list_user, _current_user), do: :error
+  def authorize(:list_user, _current_user, _), do: :error
   def authorize(:create_user, _current_user, _user), do: :error
   def authorize(:read_user, _current_user, _user), do: :error
   def authorize(:update_user, _current_user, _user), do: :error

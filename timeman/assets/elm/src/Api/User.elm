@@ -1,7 +1,7 @@
 module Api.User exposing
     ( User, UserWithToken
     , decoder, encode, userWithTokenDecoder, encodeWithToken
-    , authentication, create, update, delete
+    , authentication, create, update, delete, list
     )
 
 {-|
@@ -167,7 +167,7 @@ update options =
                                     []
                             , case options.user.preferredHours of
                                 Just preferredHours ->
-                                    [ ( "preferredHours", Encode.int preferredHours ) ]
+                                    [ ( "preferred_hours", Encode.int preferredHours ) ]
 
                                 Nothing ->
                                     []

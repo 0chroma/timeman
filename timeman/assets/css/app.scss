@@ -23,6 +23,14 @@
   background-color: red;
 }
 
+table.big-table {
+}
+
+table.big-table td,
+table.big-table th {
+  text-align: center;
+}
+
 /* Alerts and form errors */
 .alert {
   padding: 15px;

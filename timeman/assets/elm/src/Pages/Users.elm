@@ -278,13 +278,18 @@ userModal model =
          case model.modalMode of
              HideMode -> "none"
              _ -> "block"
+
+      isNew =
+         case model.modalMode of
+             NewMode -> True
+             _ -> False
   in
   div [ class "modal", style "display" modalDisplay ]
       [ button [ class "modal-close", onClick (Modal HideMode) ] [ text "×" ]
       , h2 [] [ text modalHeader ]
       , Html.form [ onSubmit ModalSubmit ]
-        [ viewInput "text" "Username" model.username UpdateUsername
-        , viewInput "password" "Password" model.password UpdatePassword
+        [ viewInput "text" "Username" model.username True UpdateUsername
+        , viewInput "password" "Password" model.password isNew UpdatePassword
         , select [ name "role", onInput UpdateRole]
             [ option [ value "user", selected (model.role == "user") ] [ text "User" ]
             , option [ value "manager", selected (model.role == "manager") ] [ text "Manager" ]
@@ -301,6 +306,6 @@ userModal model =
         ]
       ]
 
-viewInput : String -> String -> String -> (String -> msg) -> Html msg
-viewInput t p v toMsg =
-  input [ type_ t, placeholder p, value v, onInput toMsg ] []
+viewInput : String -> String -> String -> Bool -> (String -> msg) -> Html msg
+viewInput t p v req toMsg =
+  input [ type_ t, required req, placeholder p, value v, onInput toMsg ] []

@@ -100,7 +100,9 @@ update msg model =
                     , Cmd.none
                     )
                 Nothing ->
-                    ( model
+                    ( { model
+                      | entries = entries
+                      }
                     , Cmd.none
                     )
 
@@ -277,7 +279,7 @@ entryModal model =
       [ button [ class "modal-close", onClick (Modal HideMode) ] [ text "×" ]
       , h2 [] [ text modalHeader ]
       , Html.form [ onSubmit ModalSubmit ]
-        [ viewInput "text" "Username" model.entryDate UpdateDate
+        [ viewInput "text" "Date" model.entryDate UpdateDate
         , input
             [ type_ "number"
             , placeholder "Hours"
@@ -285,7 +287,7 @@ entryModal model =
             , onInput UpdateHours
             , Html.Attributes.min "1"
             , Html.Attributes.max "24"] []
-        , textarea [] [ text model.entryNotes ]
+        , textarea [ onInput UpdateNotes ] [ text model.entryNotes ]
         , button [ type_ "submit" ] [ text "Save" ]
         ]
       ]

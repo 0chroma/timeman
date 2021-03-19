@@ -31,6 +31,31 @@ table.big-table th {
   text-align: center;
 }
 
+div.modal {
+  display: hidden; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 28%;
+  top: 0;
+  overflow: auto; /* Enable scroll if needed */
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #e1e1e1;
+  background: #fff;
+  width: 400px;
+}
+
+div.modal button.modal-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 1.2em;
+  background: transparent;
+  border: transparent;
+  padding: 1em;
+  color: #000;
+}
+
 /* Alerts and form errors */
 .alert {
   padding: 15px;

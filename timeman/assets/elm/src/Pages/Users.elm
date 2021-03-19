@@ -6,7 +6,7 @@ import Api.Req exposing (Token)
 import Browser.Navigation as Nav exposing (Key)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onSubmit, onInput)
 import Spa.Document exposing (Document)
 import Spa.Generated.Route as Route
 import Spa.Page as Page exposing (Page)
@@ -34,9 +34,17 @@ type alias Params =
     ()
 
 
+type ModalMode
+    = EditMode User
+    | NewMode
+    | HideMode
+
 type alias Model =
     { token : Maybe Token
     , users : Data (List User)
+    , modalMode : ModalMode
+    , username : String
+    , password : String
     }
 
 
@@ -48,10 +56,13 @@ init shared { params } =
             ( Model
                 shared.token
                 Api.Data.Loading
+                HideMode
+                ""
+                ""
             , fetchUsers shared.token
             )
         Nothing ->
-            ( Model Nothing Api.Data.NotAsked
+            ( Model Nothing Api.Data.NotAsked NewMode "" ""
             , Nav.pushUrl shared.key (Route.toString Route.SignIn)
             )
 
@@ -62,6 +73,11 @@ type Msg
     = GotUsers ( Data ( List User ) )
     | AfterDelete ( Data () )
     | DeleteUser User
+    | ModalSubmit
+    | UpdateUsername String
+    | UpdatePassword String
+    | CloseModal
+    | OpenModal ModalMode
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -93,6 +109,30 @@ update msg model =
                 , onResponse = AfterDelete 
                 }
             )
+        UpdateUsername username ->
+            ( { model | username = username }
+            , Cmd.none
+            )
+
+        UpdatePassword password ->
+            ( { model | password = password}
+            , Cmd.none
+            )
+
+        ModalSubmit ->
+            ( model
+            , Cmd.none
+            )
+        CloseModal ->
+            ( { model | modalMode = HideMode }
+            , Cmd.none
+            )
+
+        OpenModal mode ->
+            ( { model | modalMode = mode }
+            , Cmd.none
+            )
+
 
 
 save : Model -> Shared.Model -> Shared.Model
@@ -126,6 +166,7 @@ view model =
     , body = case Api.Data.toMaybe model.users of
       Just users_ -> 
         [ h2 [] [ text "Users" ]
+        , a [ href "#", onClick (OpenModal NewMode) ] [ text "+ Add User" ]
         , table [ class "big-table" ]
           ( List.concat
             [ [ tr []
@@ -138,9 +179,10 @@ view model =
             , (List.map userRow users_)
             ]
           )
+        , ( userModal model )
         ]
       Nothing ->
-        [ text "Loading..." ]
+        [ h2 [] [ text "Loading..." ] ]
     }
 
 userRow : User -> Html Msg
@@ -150,8 +192,35 @@ userRow user =
     , td [] [ text user.role ]
     , td [] [ text ( Maybe.withDefault "" (Maybe.map String.fromInt user.preferredHours) ) ]
     , td []
-      [ a [ ] [ text "Edit" ]
+      [ a [ href "#", onClick ( OpenModal ( EditMode user ) ) ] [ text "Edit" ]
       , text " • "
       , a [ href "#", onClick (DeleteUser user) ] [ text "Delete" ]
       ]
     ]
+
+userModal : Model -> Html Msg
+userModal model =
+  let
+      modalHeader =
+         case model.modalMode of
+             EditMode _ -> "Edit User"
+             NewMode -> "New User"
+             _ -> ""
+
+      modalDisplay =
+         case model.modalMode of
+             HideMode -> "none"
+             _ -> "block"
+  in
+  div [ class "modal", style "display" modalDisplay ]
+      [ button [ class "modal-close", onClick CloseModal ] [ text "×" ]
+      , h2 [] [ text modalHeader ]
+      , Html.form [ onSubmit ModalSubmit ]
+        [ viewInput "text" "Username" model.username UpdateUsername
+        , viewInput "password" "Password" model.password UpdatePassword
+        ]
+      ]
+
+viewInput : String -> String -> String -> (String -> msg) -> Html msg
+viewInput t p v toMsg =
+  input [ type_ t, placeholder p, value v, onInput toMsg ] []

@@ -86,7 +86,7 @@ view { page, toMsg } model =
     , body =
         [ div [ class "layout" ]
             [ header [ class "navbar" ]
-                [ a [ href (Route.toString Route.Top) ] [ text "Entries" ]
+                [ a [ href (Route.toString Route.Top) ] [ text "Log Entries" ]
                 , adminLink model.user
                 , accountDetailsView toMsg model.user
                 ]

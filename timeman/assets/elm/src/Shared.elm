@@ -97,7 +97,11 @@ view { page, toMsg } model =
 
 adminLink maybeUser =
     case Maybe.map (\user -> user.role) maybeUser of
-        Just "admin" -> a [ href (Route.toString Route.Users) ] [ text "Users" ]
+        Just role -> 
+            if role == "admin" || role == "manager" then
+                a [ href (Route.toString Route.Users) ] [ text "Users" ]
+            else
+                text ""
         _ -> text ""
             
 

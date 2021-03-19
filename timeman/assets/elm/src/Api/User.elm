@@ -1,7 +1,7 @@
 module Api.User exposing
     ( User, UserWithToken
     , decoder, encode, userWithTokenDecoder, encodeWithToken
-    , authentication, registration, update
+    , authentication, create, update, delete
     )
 
 {-|
@@ -99,8 +99,9 @@ authentication options =
         }
 
 
-registration :
-    { user :
+create :
+    { token : Maybe Token
+    , user :
         { user
             | username : String
             , password : String
@@ -109,7 +110,7 @@ registration :
     , onResponse : Data UserWithToken -> msg
     }
     -> Cmd msg
-registration options =
+create options =
     let
         body : Json.Value
         body =
@@ -123,7 +124,7 @@ registration options =
                   )
                 ]
     in
-    Http.post
+    Api.Req.post (options.token)
         { url = route Api.Routes.Users
         , body = Http.jsonBody body
         , expect =
@@ -186,4 +187,33 @@ update options =
         , body = Http.jsonBody body
         , expect =
             Api.Data.expectJson options.onResponse decoder
+        }
+
+
+list :
+    { token : Maybe Token
+    , onResponse : Data (List User) -> msg
+    }
+    -> Cmd msg
+list options =
+    Api.Req.get (options.token)
+        { url = route (Api.Routes.Users)
+        , expect =
+            Api.Data.expectJson options.onResponse (Json.list decoder)
+        }
+
+delete :
+    { token : Maybe Token
+    , user :
+        { user
+            | id : Int
+        }
+    , onResponse : Data () -> msg
+    }
+    -> Cmd msg
+delete options =
+    Api.Req.delete (options.token)
+        { url = route (Api.Routes.User options.user.id)
+        , expect =
+            Api.Data.expectStatus options.onResponse
         }

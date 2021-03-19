@@ -1,6 +1,7 @@
 module Api.Data exposing
     ( Data(..)
     , expectJson
+    , expectStatus
     , map
     , toMaybe
     )
@@ -72,6 +73,30 @@ expectJson toMsg decoder =
                         Err err ->
                             Err [ Json.errorToString err ]
 
+expectStatus : (Data () -> msg) -> Http.Expect msg
+expectStatus toMsg =
+    Http.expectStringResponse (fromResult >> toMsg) <|
+        \response ->
+            case response of
+                Http.BadUrl_ _ ->
+                    Err [ "Bad URL" ]
+
+                Http.Timeout_ ->
+                    Err [ "Request timeout" ]
+
+                Http.NetworkError_ ->
+                    Err [ "Connection issues" ]
+
+                Http.BadStatus_ _ body ->
+                    case Json.decodeString errorDecoder body of
+                        Ok errors ->
+                            Err errors
+
+                        Err _ ->
+                            Err [ "Bad status code" ]
+
+                Http.GoodStatus_ _ body ->
+                    Ok ()
 
 errorDecoder : Json.Decoder (List String)
 errorDecoder =

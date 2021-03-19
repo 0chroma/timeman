@@ -83,8 +83,9 @@ update msg model =
 
         Submit ->
             ( model
-            , Api.User.registration
-                  { user =
+            , Api.User.create
+                  { token = Nothing
+                  , user =
                       { username = model.username
                       , password = model.password
                       , role = Nothing

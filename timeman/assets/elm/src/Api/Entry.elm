@@ -150,7 +150,7 @@ list :
     { token : Maybe Token
     , onResponse : Data (List Entry) -> msg
     , filters : Maybe 
-      { filter
+      { filters
       | start_date : String
       , end_date : String
       }

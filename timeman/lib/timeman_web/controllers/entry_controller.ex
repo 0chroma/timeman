@@ -12,8 +12,8 @@ defmodule TimemanWeb.EntryController do
     with :ok <- Bodyguard.permit(Timeman.WorkLog, :list_entry, current_user) do
       entries = case params do
         %{"start_date" => start_date, "end_date" => end_date} ->
-          with {:ok, start_date} = Date.from_iso8601 start_date,
-               {:ok, end_date} = Date.from_iso8601 end_date
+          with {:ok, start_date} = Date.from_iso8601(start_date),
+               {:ok, end_date} = Date.from_iso8601 (end_date)
           do
             WorkLog.list_entries_for_user(current_user, start_date, end_date)
           end

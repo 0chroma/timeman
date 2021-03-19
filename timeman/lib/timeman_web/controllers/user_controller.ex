@@ -5,8 +5,6 @@ defmodule TimemanWeb.UserController do
   alias Timeman.Accounts.User
   alias TimemanWeb.Auth.Guardian
 
-  require Logger
-   
   action_fallback TimemanWeb.FallbackController
 
   def index(conn, _params) do
@@ -19,7 +17,6 @@ defmodule TimemanWeb.UserController do
 
   def create(conn, %{"user" => user_params}) do
     current_user = Guardian.Plug.current_resource(conn)
-    Logger.info inspect(current_user)
     with :ok <- Bodyguard.permit(Timeman.Accounts, :create_user, current_user, user_params),
          {:ok, %User{} = user} <- Accounts.create_user(user_params),
          {:ok, token, _claims} <- Guardian.encode_and_sign(user) do

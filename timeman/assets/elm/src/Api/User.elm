@@ -1,5 +1,5 @@
 module Api.User exposing
-    ( User, UserWithToken
+    ( User, UserWithToken, empty
     , decoder, encode, userWithTokenDecoder, encodeWithToken
     , authentication, signup, create, update, delete, list
     )
@@ -34,6 +34,9 @@ type alias UserWithToken =
     , token : Api.Req.Token
     }
 
+empty : User
+empty =
+    User "" "" 0 Nothing
 
 -- Json
 

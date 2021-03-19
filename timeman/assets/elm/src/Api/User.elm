@@ -99,6 +99,37 @@ authentication options =
         }
 
 
+signup :
+    { user :
+        { user
+            | username : String
+            , password : String
+            , role : Maybe String
+        }
+    , onResponse : Data UserWithToken -> msg
+    }
+    -> Cmd msg
+signup options =
+    let
+        body : Json.Value
+        body =
+            Encode.object
+                [ ( "user"
+                  , Encode.object
+                        [ ( "username", Encode.string options.user.username )
+                        , ( "password", Encode.string options.user.password )
+                        , ( "role", Encode.string (Maybe.withDefault "user" options.user.role ) )
+                        ]
+                  )
+                ]
+    in
+    Http.post
+        { url = route Api.Routes.SignUp
+        , body = Http.jsonBody body
+        , expect =
+            Api.Data.expectJson options.onResponse userWithTokenDecoder
+        }
+
 create :
     { token : Maybe Token
     , user :

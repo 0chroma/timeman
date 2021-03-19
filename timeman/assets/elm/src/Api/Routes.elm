@@ -21,4 +21,6 @@ route endpoint =
             "/api/entries/" ++ String.fromInt id
         SignIn ->
             "/api/users/signin"
+        SignUp ->
+            "/api/users/signup"
 

@@ -40,13 +40,13 @@ defmodule TimemanWeb.Router do
   
   scope "/api", TimemanWeb do
     pipe_through :api
-    resources "/users", UserController, only: [:create, :new]
+    resources "/users/signup", UserController, only: [:create]
     post "/users/signin", UserController, :signin
   end
 
   scope "/api", TimemanWeb do
     pipe_through [:api, :auth]
-    resources "/users", UserController, except: [:create, :new]
+    resources "/users", UserController
     resources "/entries", EntryController
   end
 

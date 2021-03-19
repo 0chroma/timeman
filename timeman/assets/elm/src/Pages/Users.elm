@@ -41,10 +41,13 @@ type ModalMode
 
 type alias Model =
     { token : Maybe Token
+    , key : Key
     , users : Data (List User)
     , modalMode : ModalMode
     , username : String
     , password : String
+    , role: String
+    , preferredHours: Maybe Int
     }
 
 
@@ -55,14 +58,17 @@ init shared { params } =
         Just user ->
             ( Model
                 shared.token
+                shared.key
                 Api.Data.Loading
                 HideMode
                 ""
                 ""
+                ""
+                Nothing
             , fetchUsers shared.token
             )
         Nothing ->
-            ( Model Nothing Api.Data.NotAsked NewMode "" ""
+            ( Model Nothing shared.key Api.Data.NotAsked NewMode "" "" "" Nothing
             , Nav.pushUrl shared.key (Route.toString Route.SignIn)
             )
 
@@ -76,8 +82,11 @@ type Msg
     | ModalSubmit
     | UpdateUsername String
     | UpdatePassword String
-    | CloseModal
-    | OpenModal ModalMode
+    | UpdateRole String
+    | UpdatePreferredHours String
+    | Modal ModalMode
+    | ModalCreateResponse (Data UserWithToken)
+    | ModalEditResponse (Data User)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -119,17 +128,75 @@ update msg model =
             , Cmd.none
             )
 
-        ModalSubmit ->
-            ( model
+        UpdateRole role ->
+            ( { model | role = role}
             , Cmd.none
             )
-        CloseModal ->
-            ( { model | modalMode = HideMode }
+        
+        UpdatePreferredHours preferredHours ->
+            ( { model | preferredHours = String.toInt preferredHours }
             , Cmd.none
             )
 
-        OpenModal mode ->
-            ( { model | modalMode = mode }
+        ModalSubmit ->
+            ( model
+            , case model.modalMode of
+                  NewMode ->
+                      Api.User.create
+                        { token = model.token
+                        , user =
+                            { username = model.username
+                            , password = model.password
+                            , role = Just model.role
+                            , preferredHours = model.preferredHours
+                            }
+                        , onResponse = ModalCreateResponse 
+                        }
+
+                  EditMode user ->
+                      Api.User.update
+                        { token = model.token
+                        , user =
+                            { id = user.id
+                            , username = Just model.username
+                            , password = if model.password == "" then Nothing else Just model.password
+                            , role = Just model.role
+                            , preferredHours = model.preferredHours
+                            }
+                        , onResponse = ModalEditResponse 
+                        }
+
+                  HideMode -> Cmd.none
+            )
+
+        ModalCreateResponse data ->
+            ( model, Nav.pushUrl model.key (Route.toString Route.Users) )
+
+        ModalEditResponse data ->
+            ( model, Nav.pushUrl model.key (Route.toString Route.Users) )
+
+        Modal mode ->
+            (
+                case mode of
+                    NewMode ->
+                        { model
+                        | modalMode = mode
+                        , username = ""
+                        , password = ""
+                        , role = "admin"
+                        , preferredHours = Nothing
+                        }
+                    EditMode user ->
+                        { model
+                        | modalMode = mode
+                        , username = user.username
+                        , password = ""
+                        , role = user.role
+                        , preferredHours = user.preferredHours
+                        }
+                    HideMode ->
+                        { model | modalMode = HideMode }
+
             , Cmd.none
             )
 
@@ -166,7 +233,7 @@ view model =
     , body = case Api.Data.toMaybe model.users of
       Just users_ -> 
         [ h2 [] [ text "Users" ]
-        , a [ href "#", onClick (OpenModal NewMode) ] [ text "+ Add User" ]
+        , a [ href "#", onClick (Modal NewMode) ] [ text "+ Add User" ]
         , table [ class "big-table" ]
           ( List.concat
             [ [ tr []
@@ -192,7 +259,7 @@ userRow user =
     , td [] [ text user.role ]
     , td [] [ text ( Maybe.withDefault "" (Maybe.map String.fromInt user.preferredHours) ) ]
     , td []
-      [ a [ href "#", onClick ( OpenModal ( EditMode user ) ) ] [ text "Edit" ]
+      [ a [ href "#", onClick ( Modal ( EditMode user ) ) ] [ text "Edit" ]
       , text " • "
       , a [ href "#", onClick (DeleteUser user) ] [ text "Delete" ]
       ]
@@ -213,11 +280,24 @@ userModal model =
              _ -> "block"
   in
   div [ class "modal", style "display" modalDisplay ]
-      [ button [ class "modal-close", onClick CloseModal ] [ text "×" ]
+      [ button [ class "modal-close", onClick (Modal HideMode) ] [ text "×" ]
       , h2 [] [ text modalHeader ]
       , Html.form [ onSubmit ModalSubmit ]
         [ viewInput "text" "Username" model.username UpdateUsername
         , viewInput "password" "Password" model.password UpdatePassword
+        , select [ name "role", onInput UpdateRole]
+            [ option [ value "user", selected (model.role == "user") ] [ text "User" ]
+            , option [ value "manager", selected (model.role == "manager") ] [ text "Manager" ]
+            , option [ value "admin", selected (model.role == "admin") ] [ text "Admin" ]
+            ]
+        , input
+            [ type_ "number"
+            , placeholder "Preferred Hours"
+            , value ( String.fromInt ( Maybe.withDefault 1 model.preferredHours ) )
+            , onInput UpdatePreferredHours
+            , Html.Attributes.min "1"
+            , Html.Attributes.max "24"] []
+        , button [ type_ "submit" ] [ text "Save" ]
         ]
       ]
 

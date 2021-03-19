@@ -114,7 +114,7 @@ defmodule Timeman.Accounts do
   end
 
   # Admins/Managers can CRUD anything
-  def authorize(:list_user, %{role: :admin} = _current_user, _), do: :ok
+  def authorize(:list_user, %{role: :admin} = _current_user, _user), do: :ok
   def authorize(:create_user, %{role: :admin} = _current_user, _user), do: :ok
   def authorize(:read_user, %{role: :admin} = _current_user, _user), do: :ok
   def authorize(:update_user, %{role: :admin} = _current_user, _user), do: :ok

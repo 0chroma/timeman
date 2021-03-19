@@ -49,6 +49,8 @@ type alias Model =
     , entryDate : String
     , entryHours : Int
     , entryNotes : String
+    , filterStartDate : String
+    , filterEndDate : String
     }
 
 
@@ -66,10 +68,12 @@ init shared { params } =
                 ""
                 0
                 ""
-            , fetchEntries shared.token
+                ""
+                ""
+            , fetchEntries shared.token "" ""
             )
         Nothing ->
-            ( Model Nothing shared.key Api.User.empty Api.Data.NotAsked NewMode "" 0 ""
+            ( Model Nothing shared.key Api.User.empty Api.Data.NotAsked NewMode "" 0 "" "" ""
             , Nav.pushUrl shared.key (Route.toString Route.SignIn)
             )
 
@@ -86,6 +90,8 @@ type Msg
     | UpdateDate String
     | UpdateHours String
     | UpdateNotes String
+    | UpdateFilterStart String
+    | UpdateFilterEnd String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -108,7 +114,7 @@ update msg model =
 
         AfterDelete _ ->
           ( model
-          , fetchEntries model.token
+          , fetchEntries model.token model.filterStartDate model.filterEndDate
           )
 
         DeleteEntry entry ->
@@ -135,6 +141,16 @@ update msg model =
                   Just hours_ -> { model | entryHours = hours_ }
                   Nothing -> model
             , Cmd.none
+            )
+
+        UpdateFilterStart date ->
+            ( { model | filterStartDate = date}
+            , fetchEntries model.token model.filterStartDate model.filterEndDate
+            )
+
+        UpdateFilterEnd date ->
+            ( { model | filterEndDate = date}
+            , fetchEntries model.token model.filterStartDate model.filterEndDate
             )
 
         ModalSubmit ->
@@ -210,11 +226,23 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
 
-fetchEntries : Maybe Api.Req.Token -> Cmd Msg
-fetchEntries token =
+fetchEntries : Maybe Api.Req.Token -> String -> String -> Cmd Msg
+fetchEntries token startDate endDate =
+    let
+        dates = case (startDate, endDate) of
+            ("", "") -> Nothing
+            (_, "") -> Nothing
+            ("", _) -> Nothing
+            (start, end) ->
+                Just 
+                    { start_date = start
+                    , end_date = end
+                    }
+    in
     Api.Entry.list
         { token = token
         , onResponse = GotEntries
+        , filters = dates
         }
 
 
@@ -228,6 +256,7 @@ view model =
       Just entries_ -> 
         [ h2 [] [ text "Log Entries" ]
         , a [ href "#", onClick (Modal NewMode) ] [ text "+ Add Log Entry" ]
+        , (entryFilters model)
         , table [ class "big-table" ]
           ( List.concat
             [ [ tr []
@@ -260,6 +289,14 @@ entryRow entry =
       , a [ href "#", onClick (DeleteEntry entry) ] [ text "Delete" ]
       ]
     ]
+
+entryFilters : Model -> Html Msg
+entryFilters model =
+  span [ class "filters" ]
+      [ text "Filter: "
+      , viewInput "date" "Start Date" model.filterStartDate UpdateFilterStart
+      , viewInput "date" "End Date" model.filterEndDate UpdateFilterEnd
+      ]
 
 entryModal : Model -> Html Msg
 entryModal model =

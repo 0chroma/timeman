@@ -29,6 +29,15 @@ defmodule Timeman.WorkLog do
     |> Repo.all
   end
 
+  def list_entries_for_user(user, start_date, end_date) do
+    query = from e in Entry,
+      where: e.date >= ^start_date and e.date <= ^end_date,
+      select: e
+    Entry
+    |> Bodyguard.scope(user)
+    |> Repo.all(query)
+  end
+
   @doc """
   Gets a single entry.
 

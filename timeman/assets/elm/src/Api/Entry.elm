@@ -149,11 +149,23 @@ update options =
 list :
     { token : Maybe Token
     , onResponse : Data (List Entry) -> msg
+    , filters : Maybe 
+      { filter
+      | start_date : String
+      , end_date : String
+      }
     }
     -> Cmd msg
 list options =
+    let 
+        url = case options.filters of
+            Nothing ->
+                route (Api.Routes.Entries)
+            Just dates ->
+                (route (Api.Routes.Entries)) ++ "?start_date=" ++ dates.start_date ++ "&end_date=" ++ dates.end_date
+    in
     Api.Req.get (options.token)
-        { url = route (Api.Routes.Entries)
+        { url = url 
         , expect =
             Api.Data.expectJson options.onResponse (Json.list decoder)
         }

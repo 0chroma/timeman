@@ -6,11 +6,20 @@ defmodule TimemanWeb.EntryController do
 
   action_fallback TimemanWeb.FallbackController
 
-  def index(conn, _params) do
+  def index(conn, params) do
     current_user = Guardian.Plug.current_resource(conn)
 
     with :ok <- Bodyguard.permit(Timeman.WorkLog, :list_entry, current_user) do
-      entries = WorkLog.list_entries_for_user(current_user)
+      entries = case params do
+        %{"start_date" => start_date, "end_date" => end_date} ->
+          with {:ok, start_date} = Date.from_iso8601 start_date,
+               {:ok, end_date} = Date.from_iso8601 end_date
+          do
+            WorkLog.list_entries_for_user(current_user, start_date, end_date)
+          end
+        _ ->
+          WorkLog.list_entries_for_user(current_user)
+      end
       render(conn, "index.json", entries: entries)
     end
   end

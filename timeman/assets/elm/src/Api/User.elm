@@ -1,7 +1,7 @@
 module Api.User exposing
     ( User, UserWithToken
     , decoder, encode, userWithTokenDecoder, encodeWithToken
-    , authentication, create, update, delete, list
+    , authentication, signup, create, update, delete, list
     )
 
 {-|

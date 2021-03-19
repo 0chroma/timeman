@@ -7,6 +7,7 @@ type Endpoint
     | User (Int)
     | Entry (Int)
     | SignIn
+    | SignUp
 
 route : Endpoint -> String
 route endpoint = 

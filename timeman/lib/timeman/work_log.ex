@@ -9,6 +9,7 @@ defmodule Timeman.WorkLog do
   alias Timeman.Repo
 
   alias Timeman.WorkLog.Entry
+  alias Timeman.Accounts.User
 
   @doc """
   Returns the list of entries.
@@ -23,19 +24,22 @@ defmodule Timeman.WorkLog do
     Repo.all(Entry)
   end
 
-  def list_entries_for_user(user) do
+  def entries_for_user_query(user) do
     Entry
     |> Bodyguard.scope(user)
+    |> join(:left, [e], u in User, on: e.user_id == u.id)
+    |> preload(:user)
+  end
+
+  def list_entries_for_user(user) do
+    entries_for_user_query(user)
     |> Repo.all
   end
 
   def list_entries_for_user(user, start_date, end_date) do
-    query = from e in Entry,
-      where: e.date >= ^start_date and e.date <= ^end_date,
-      select: e
-    Entry
-    |> Bodyguard.scope(user)
-    |> Repo.all(query)
+    entries_for_user_query(user)
+    |> where([e], e.date >= ^start_date and e.date <= ^end_date)
+    |> Repo.all
   end
 
   @doc """

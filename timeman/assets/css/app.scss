@@ -19,8 +19,7 @@
 
 .centered-form .error {
   margin-bottom: 1em;
-  color: #fff;
-  background-color: red;
+  background-color: #fcb8bb;
 }
 
 table.big-table {
@@ -29,6 +28,13 @@ table.big-table {
 table.big-table td,
 table.big-table th {
   text-align: center;
+}
+
+table.big-table tr.ok {
+  background-color: #bafcb8;
+}
+table.big-table tr.flagged {
+  background-color: #fcb8bb;
 }
 
 div.modal {

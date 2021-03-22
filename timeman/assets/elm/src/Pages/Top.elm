@@ -145,12 +145,12 @@ update msg model =
 
         UpdateFilterStart date ->
             ( { model | filterStartDate = date}
-            , fetchEntries model.token model.filterStartDate model.filterEndDate
+            , fetchEntries model.token date model.filterEndDate
             )
 
         UpdateFilterEnd date ->
             ( { model | filterEndDate = date}
-            , fetchEntries model.token model.filterStartDate model.filterEndDate
+            , fetchEntries model.token model.filterStartDate date
             )
 
         ModalSubmit ->
@@ -176,7 +176,7 @@ update msg model =
                             , date = Just model.entryDate
                             , hours = Just model.entryHours
                             , notes = Just model.entryNotes
-                            , user_id = Just entry.user_id
+                            , user_id = Just entry.user.id
                             }
                         , onResponse = ModalResponse 
                         }
@@ -278,11 +278,17 @@ view model =
 
 entryRow : Entry -> Html Msg
 entryRow entry =
-    tr []
+    let
+        isFlagged = case entry.user.preferredHours of
+            Just hours ->
+               hours > entry.hours 
+            Nothing -> False
+    in
+    tr [ class ( if isFlagged then "flagged" else "ok" ) ]
     [ td [] [ text entry.date ]
     , td [] [ text ( String.fromInt entry.hours ) ]
     , td [] ( String.split "\n" entry.notes |> List.map ( \line -> div [] [ text line ] ) )
-    , td [] [ text ( String.fromInt entry.user_id ) ]
+    , td [] [ text entry.user.username ]
     , td []
       [ a [ href "#", onClick ( Modal ( EditMode entry ) ) ] [ text "Edit" ]
       , text " • "
@@ -323,7 +329,9 @@ entryModal model =
             , value ( String.fromInt model.entryHours )
             , onInput UpdateHours
             , Html.Attributes.min "1"
-            , Html.Attributes.max "24"] []
+            , Html.Attributes.max "24"
+            ]
+            []
         , textarea [ required True, onInput UpdateNotes ] [ text model.entryNotes ]
         , button [ type_ "submit" ] [ text "Save" ]
         ]

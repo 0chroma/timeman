@@ -1,6 +1,7 @@
 defmodule TimemanWeb.EntryView do
   use TimemanWeb, :view
   alias TimemanWeb.EntryView
+  alias TimemanWeb.UserView
 
   def render("index.json", %{entries: entries}) do
     render_many(entries, EntryView, "entry.json")
@@ -15,7 +16,7 @@ defmodule TimemanWeb.EntryView do
       date: entry.date,
       hours: entry.hours,
       notes: entry.notes,
-      user_id: entry.user_id
+      user: UserView.render("user.json", %{user: entry.user})
     }
   end
 end

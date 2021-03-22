@@ -16,6 +16,7 @@ module Api.Entry exposing
 import Api.Data exposing (Data)
 import Api.Req exposing (Token)
 import Api.Routes exposing (Endpoint, route)
+import Api.User
 import Http
 import Json.Decode as Json
 import Json.Encode as Encode
@@ -27,7 +28,7 @@ type alias Entry =
     , date : String
     , hours : Int
     , notes : String
-    , user_id : Int
+    , user : Api.User.User
     }
 
 
@@ -40,7 +41,7 @@ decoder =
         (Json.field "date" Json.string)
         (Json.field "hours" Json.int)
         (Json.field "notes" Json.string)
-        (Json.field "user_id" Json.int)
+        (Json.field "user" Api.User.decoder)
 
 
 
@@ -50,7 +51,7 @@ encode entry =
         [ ( "date", Encode.string entry.date )
         , ( "hours", Encode.int entry.hours )
         , ( "notes", Encode.string entry.notes )
-        , ( "user_id", Encode.int entry.user_id )
+        , ( "user", Api.User.encode entry.user )
         ]
 
 

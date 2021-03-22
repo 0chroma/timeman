@@ -11,7 +11,7 @@ defmodule Timeman.Accounts.User do
 
     timestamps()
 
-    has_many :entries, Timeman.WorkLog.Entry
+    has_many :entries, Timeman.WorkLog.Entry, on_delete: :delete_all
   end
 
   @doc false

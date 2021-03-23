@@ -233,7 +233,7 @@ view model =
     , body = case Api.Data.toMaybe model.users of
       Just users_ -> 
         [ h2 [] [ text "Users" ]
-        , a [ href "#", onClick (Modal NewMode) ] [ text "+ Add User" ]
+        , button [ class "inline", onClick (Modal NewMode) ] [ text "+ Add User" ]
         , table [ class "big-table" ]
           ( List.concat
             [ [ tr []
@@ -259,9 +259,9 @@ userRow user =
     , td [] [ text user.role ]
     , td [] [ text ( Maybe.withDefault "" (Maybe.map String.fromInt user.preferredHours) ) ]
     , td []
-      [ a [ href "#", onClick ( Modal ( EditMode user ) ) ] [ text "Edit" ]
+      [ button [ class "inline", onClick ( Modal ( EditMode user ) ) ] [ text "Edit" ]
       , text " • "
-      , a [ href "#", onClick (DeleteUser user) ] [ text "Delete" ]
+      , button [ class "inline", onClick (DeleteUser user) ] [ text "Delete" ]
       ]
     ]
 

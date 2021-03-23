@@ -263,7 +263,7 @@ view model =
     , body = case Api.Data.toMaybe model.entries of
       Just entries_ -> 
         [ h2 [] [ text "Log Entries" ]
-        , a [ href "#", onClick (Modal NewMode) ] [ text "+ Add Log Entry" ]
+        , button [ class "inline", onClick (Modal NewMode) ] [ text "+ Add Log Entry" ]
         , (entryFilters model)
         , table [ class "big-table" ]
           ( List.concat
@@ -298,9 +298,9 @@ entryRow entry =
     , td [] ( String.split "\n" entry.notes |> List.map ( \line -> div [] [ text line ] ) )
     , td [] [ text entry.user.username ]
     , td []
-      [ a [ href "#", onClick ( Modal ( EditMode entry ) ) ] [ text "Edit" ]
+      [ button [ class "inline", onClick ( Modal ( EditMode entry ) ) ] [ text "Edit" ]
       , text " • "
-      , a [ href "#", onClick (DeleteEntry entry) ] [ text "Delete" ]
+      , button [ class "inline", onClick (DeleteEntry entry) ] [ text "Delete" ]
       ]
     ]
 
@@ -309,10 +309,12 @@ entryFilters model =
   span [ class "filters" ]
       [ text "Filter: "
       , viewInput "date" "Start Date" model.filterStartDate UpdateFilterStart
-      , a [ href "#", onClick ( UpdateFilterStart "" ) ] [ text "x" ]
       , text " "
+      , button [ class "inline", onClick ( UpdateFilterStart "" ) ] [ text "x" ]
+      , text " to "
       , viewInput "date" "End Date" model.filterEndDate UpdateFilterEnd
-      , a [ href "#", onClick ( UpdateFilterEnd "" ) ] [ text "x" ]
+      , text " "
+      , button [ class "inline", onClick ( UpdateFilterEnd "" ) ] [ text "x" ]
       ]
 
 entryModal : Model -> Html Msg

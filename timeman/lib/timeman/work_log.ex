@@ -28,6 +28,7 @@ defmodule Timeman.WorkLog do
     Entry
     |> Bodyguard.scope(user)
     |> join(:left, [e], u in User, on: e.user_id == u.id)
+    |> order_by(desc: :date)
     |> preload(:user)
   end
 
@@ -36,9 +37,21 @@ defmodule Timeman.WorkLog do
     |> Repo.all
   end
 
-  def list_entries_for_user(user, start_date, end_date) do
+  def list_entries_for_user(user, %{start_date: start_date, end_date: end_date}) do
     entries_for_user_query(user)
     |> where([e], e.date >= ^start_date and e.date <= ^end_date)
+    |> Repo.all
+  end
+
+  def list_entries_for_user(user, %{start_date: start_date}) do
+    entries_for_user_query(user)
+    |> where([e], e.date >= ^start_date)
+    |> Repo.all
+  end
+
+  def list_entries_for_user(user, %{end_date: end_date}) do
+    entries_for_user_query(user)
+    |> where([e], e.date <= ^end_date)
     |> Repo.all
   end
 

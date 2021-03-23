@@ -18,6 +18,7 @@ import Api.Req exposing (Token)
 import Api.Routes exposing (Endpoint, route)
 import Api.User
 import Http
+import Dict exposing (Dict)
 import Json.Decode as Json
 import Json.Encode as Encode
 import Utils.Json
@@ -146,24 +147,29 @@ update options =
             Api.Data.expectJson options.onResponse decoder
         }
 
+filter_to_query : String -> Maybe String -> String
+filter_to_query name value =
+    Maybe.withDefault "" ( Maybe.map ( \val -> name ++ "=" ++ val) value )
 
 list :
     { token : Maybe Token
     , onResponse : Data (List Entry) -> msg
-    , filters : Maybe 
+    , filters : 
       { filters
-      | start_date : String
-      , end_date : String
+      | start_date : Maybe String
+      , end_date : Maybe String
       }
     }
     -> Cmd msg
 list options =
     let 
-        url = case options.filters of
-            Nothing ->
-                route (Api.Routes.Entries)
-            Just dates ->
-                (route (Api.Routes.Entries)) ++ "?start_date=" ++ dates.start_date ++ "&end_date=" ++ dates.end_date
+        query =
+            [ ( filter_to_query "start_date" options.filters.start_date )
+            , ( filter_to_query "end_date" options.filters.end_date )
+            ]
+            |> List.filter ( \item -> not ( item == "" ) )
+            |> String.join "&"
+        url = ( route (Api.Routes.Entries) ) ++ "?" ++ query
     in
     Api.Req.get (options.token)
         { url = url 

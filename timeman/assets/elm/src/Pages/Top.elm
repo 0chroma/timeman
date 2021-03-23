@@ -230,14 +230,22 @@ fetchEntries : Maybe Api.Req.Token -> String -> String -> Cmd Msg
 fetchEntries token startDate endDate =
     let
         dates = case (startDate, endDate) of
-            ("", "") -> Nothing
-            (_, "") -> Nothing
-            ("", _) -> Nothing
+            ("", "") ->
+                { start_date = Nothing
+                , end_date = Nothing
+                }
+            (start, "") ->
+                { start_date = Just start
+                , end_date = Nothing
+                }
+            ("", end) ->
+                { start_date = Nothing
+                , end_date = Just end
+                }
             (start, end) ->
-                Just 
-                    { start_date = start
-                    , end_date = end
-                    }
+                { start_date = Just start
+                , end_date = Just end
+                }
     in
     Api.Entry.list
         { token = token

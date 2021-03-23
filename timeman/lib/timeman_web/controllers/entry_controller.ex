@@ -4,22 +4,23 @@ defmodule TimemanWeb.EntryController do
   alias Timeman.WorkLog
   alias Timeman.WorkLog.Entry
 
+  require Logger
+
   action_fallback TimemanWeb.FallbackController
 
   def index(conn, params) do
     current_user = Guardian.Plug.current_resource(conn)
 
     with :ok <- Bodyguard.permit(Timeman.WorkLog, :list_entry, current_user) do
-      entries = case params do
-        %{"start_date" => startD, "end_date" => endD} ->
-          with {:ok, start_date} = Date.from_iso8601(startD),
-               {:ok, end_date} = Date.from_iso8601(endD)
-          do
-            WorkLog.list_entries_for_user(current_user, start_date, end_date)
-          end
-        _ ->
-          WorkLog.list_entries_for_user(current_user)
-      end
+      param_map = %{
+        "start_date" => :start_date,
+        "end_date" => :end_date
+      }
+      date_filters = params
+                     |> Enum.map(fn({k, v}) -> {param_map[k], Date.from_iso8601!(v)} end)
+                     |> Map.new
+      Logger.log(:info, inspect(date_filters))
+      entries = WorkLog.list_entries_for_user(current_user, date_filters)
       render(conn, "index.json", entries: entries)
     end
   end

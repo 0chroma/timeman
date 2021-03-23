@@ -309,7 +309,10 @@ entryFilters model =
   span [ class "filters" ]
       [ text "Filter: "
       , viewInput "date" "Start Date" model.filterStartDate UpdateFilterStart
+      , a [ href "#", onClick ( UpdateFilterStart "" ) ] [ text "x" ]
+      , text " "
       , viewInput "date" "End Date" model.filterEndDate UpdateFilterEnd
+      , a [ href "#", onClick ( UpdateFilterEnd "" ) ] [ text "x" ]
       ]
 
 entryModal : Model -> Html Msg

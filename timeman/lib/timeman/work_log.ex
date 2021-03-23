@@ -33,8 +33,7 @@ defmodule Timeman.WorkLog do
   end
 
   def list_entries_for_user(user) do
-    entries_for_user_query(user)
-    |> Repo.all
+    list_entries_for_user(user, %{})
   end
 
   def list_entries_for_user(user, %{start_date: start_date, end_date: end_date}) do
@@ -52,6 +51,11 @@ defmodule Timeman.WorkLog do
   def list_entries_for_user(user, %{end_date: end_date}) do
     entries_for_user_query(user)
     |> where([e], e.date <= ^end_date)
+    |> Repo.all
+  end
+
+  def list_entries_for_user(user, %{}) do
+    entries_for_user_query(user)
     |> Repo.all
   end
 

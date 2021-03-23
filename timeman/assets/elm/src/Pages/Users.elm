@@ -44,6 +44,7 @@ type alias Model =
     , key : Key
     , users : Data (List User)
     , modalMode : ModalMode
+    , modalResponse : Data User
     , username : String
     , password : String
     , role: String
@@ -61,6 +62,7 @@ init shared { params } =
                 shared.key
                 Api.Data.Loading
                 HideMode
+                Api.Data.NotAsked
                 ""
                 ""
                 ""
@@ -68,7 +70,7 @@ init shared { params } =
             , fetchUsers shared.token
             )
         Nothing ->
-            ( Model Nothing shared.key Api.Data.NotAsked NewMode "" "" "" Nothing
+            ( Model Nothing shared.key Api.Data.NotAsked HideMode Api.Data.NotAsked "" "" "" Nothing
             , Nav.pushUrl shared.key (Route.toString Route.SignIn)
             )
 
@@ -170,10 +172,26 @@ update msg model =
             )
 
         ModalCreateResponse data ->
-            ( model, Nav.pushUrl model.key (Route.toString Route.Users) )
+            let
+                response = case data of
+                    Api.Data.Success userWithToken -> Api.Data.Success userWithToken.user
+                    Api.Data.Failure err -> Api.Data.Failure err
+                    Api.Data.Loading -> Api.Data.Loading
+                    Api.Data.NotAsked -> Api.Data.NotAsked
+
+            in
+            ( { model | modalResponse = response }
+            , case Api.Data.toMaybe data of
+                Just _ -> Nav.pushUrl model.key (Route.toString Route.Users)
+                Nothing -> Cmd.none
+            )
 
         ModalEditResponse data ->
-            ( model, Nav.pushUrl model.key (Route.toString Route.Users) )
+            ( { model | modalResponse = data }
+            , case Api.Data.toMaybe data of
+                Just _ -> Nav.pushUrl model.key (Route.toString Route.Users)
+                Nothing -> Cmd.none
+            )
 
         Modal mode ->
             (
@@ -183,7 +201,7 @@ update msg model =
                         | modalMode = mode
                         , username = ""
                         , password = ""
-                        , role = "admin"
+                        , role = "user"
                         , preferredHours = Nothing
                         }
                     EditMode user ->
@@ -301,11 +319,42 @@ userModal model =
             , value ( String.fromInt ( Maybe.withDefault 1 model.preferredHours ) )
             , onInput UpdatePreferredHours
             , Html.Attributes.min "1"
-            , Html.Attributes.max "24"] []
-        , button [ type_ "submit" ] [ text "Save" ]
+            , Html.Attributes.max "24"
+            ]
+            []
+        , viewValidation model
         ]
       ]
 
 viewInput : String -> String -> String -> Bool -> (String -> msg) -> Html msg
 viewInput t p v req toMsg =
   input [ type_ t, required req, placeholder p, value v, onInput toMsg ] []
+
+viewValidation : Model -> Html msg
+viewValidation model =
+    let 
+        isUsernameLength =
+            (String.length model.username) >= 5
+
+        isPasswordLength =
+            (String.length model.password) >= 8 || (model.password == "")
+
+        isDisabled =
+             not (isUsernameLength && isPasswordLength)
+
+        errorText =
+            if not isUsernameLength then
+                "Username too short"
+            else if not isPasswordLength then
+                "Password too short"
+            else
+                case model.modalResponse of
+                    Api.Data.Failure list ->
+                        Maybe.withDefault "" (List.head list)
+                    _ ->
+                        ""
+    in
+    div []
+        [ div [ class "error" ] [ text errorText ]
+        , button [type_ "submit", class "centered", disabled isDisabled ] [ text "Save" ]
+        ]

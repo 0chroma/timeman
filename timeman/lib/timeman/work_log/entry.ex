@@ -16,6 +16,8 @@ defmodule Timeman.WorkLog.Entry do
   def changeset(entry, attrs) do
     entry
     |> cast(attrs, [:date, :hours, :notes, :user_id])
+    |> validate_required([:date, :hours, :notes, :user_id])
+    |> validate_number(:hours, less_than: 24, greater_than: 0)
   end
 
   def scope(query, %Timeman.Accounts.User{id: user_id, role: user_role}, _) do

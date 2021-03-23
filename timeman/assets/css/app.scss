@@ -35,8 +35,9 @@ button.inline:hover {
   margin-right: auto;
 }
 
-.centered-form .error {
+form .error {
   margin-bottom: 1em;
+  padding: 0 0.5em;
   background-color: #fcb8bb;
 }
 
@@ -59,7 +60,7 @@ div.modal {
   display: hidden; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 1; /* Sit on top */
-  left: 28%;
+  left: calc(50vw - 200px);
   top: 0;
   overflow: auto; /* Enable scroll if needed */
   margin: 15% auto; /* 15% from the top and centered */
@@ -89,7 +90,7 @@ div.modal button.modal-close {
   width: auto;
 }
 
-body .filters button {
+body .filters button.reset {
   margin-left: -1.4em;
   margin-right: 0.6em;
 }

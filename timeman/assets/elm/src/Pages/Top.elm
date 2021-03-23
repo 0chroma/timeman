@@ -310,11 +310,11 @@ entryFilters model =
       [ text "Filter: "
       , viewInput "date" "Start Date" model.filterStartDate UpdateFilterStart
       , text " "
-      , button [ class "inline", onClick ( UpdateFilterStart "" ) ] [ text "x" ]
+      , button [ class "inline reset", onClick ( UpdateFilterStart "" ) ] [ text "x" ]
       , text " to "
       , viewInput "date" "End Date" model.filterEndDate UpdateFilterEnd
       , text " "
-      , button [ class "inline", onClick ( UpdateFilterEnd "" ) ] [ text "x" ]
+      , button [ class "inline reset", onClick ( UpdateFilterEnd "" ) ] [ text "x" ]
       ]
 
 entryModal : Model -> Html Msg

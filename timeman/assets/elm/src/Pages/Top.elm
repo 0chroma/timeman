@@ -5,6 +5,7 @@ import Api.Entry exposing (Entry)
 import Api.User exposing (User)
 import Api.Req exposing (Token)
 import Browser.Navigation as Nav exposing (Key)
+import Export
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onSubmit, onInput)
@@ -92,6 +93,7 @@ type Msg
     | UpdateNotes String
     | UpdateFilterStart String
     | UpdateFilterEnd String
+    | ExportData
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -210,6 +212,13 @@ update msg model =
             , Cmd.none
             )
 
+        ExportData ->
+            case Api.Data.toMaybe model.entries of
+              Just entries_ -> 
+                  ( model, Export.entries entries_ )
+              Nothing ->
+                  ( model, Cmd.none )
+
 
 
 save : Model -> Shared.Model -> Shared.Model
@@ -264,25 +273,30 @@ view model =
       Just entries_ -> 
         [ h2 [] [ text "Log Entries" ]
         , button [ class "inline", onClick (Modal NewMode) ] [ text "+ Add Log Entry" ]
-        , (entryFilters model)
-        , table [ class "big-table" ]
-          ( List.concat
-            [ [ tr []
-                [ th [] [ text "Date" ]
-                , th [] [ text "Hours" ]
-                , th [] [ text "Notes" ]
-                , th [] [ text "User" ]
-                , th [] [ text "Action" ]
-                ]
-              ]
-            , (List.map entryRow entries_)
-            ]
-          )
-        , ( entryModal model )
+        , entryFilters model
+        , button [ class "inline", onClick ExportData ] [ text "Export" ]
+        , entryTable entries_
+        , entryModal model
         ]
       Nothing ->
         [ h2 [] [ text "Loading..." ] ]
     }
+
+entryTable : List Entry -> Html Msg
+entryTable entries =
+    table [ class "big-table" ]
+    ( List.concat
+      [ [ tr []
+          [ th [] [ text "Date" ]
+          , th [] [ text "Hours" ]
+          , th [] [ text "Notes" ]
+          , th [] [ text "User" ]
+          , th [] [ text "Action" ]
+          ]
+        ]
+      , (List.map entryRow entries)
+      ]
+    )
 
 entryRow : Entry -> Html Msg
 entryRow entry =
